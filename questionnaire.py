@@ -3,32 +3,51 @@ Fichier de génération de questionnaires depuis des fichiers json.
 """
 import json
 
+
+NUMERO_QUESTION = 1
+
+
 class Question:
-    def __init__(self, titre, choix, bonne_reponse):
+    """
+    Classe qui permet de générer une question depuis un fichier JSON
+    """
+    def __init__(self, titre: str, choix: list, bonne_reponse: str):
         self.titre = titre
         self.choix = choix
         self.bonne_reponse = bonne_reponse
 
-    def FromJsonData(data):
+    def FromJsonData(data : dict) -> object:
+        """
+        Fonction qui permet de lire un fichier json et d'en extraire les données.
 
-        choix = [info[0] for info in data["choix"]]
-        bonne_reponse = [info[0] for info in data["choix"] if info[1]]
-        # prendre en compte le cas d'aucune réponse + trop de réponse.
+        :returns: un objet Question avec ses données
+        """
+        choix = [i[0] for i in data["choix"]]
+        bonne_reponse = [i[0] for i in data["choix"] if i[1]]
+        # prendre en compte le cas d'aucune réponse et de plus d'une réponse.
         if len(bonne_reponse) != 1:
             return None
         q = Question(data["titre"], choix, bonne_reponse[0])
-        print()
         return q
 
-    def poser(self):
-        print("QUESTION")
+    def poser(self) -> bool:
+        """
+        Fonction pour démarrer le questionnaire.
+        Elle retourne true ou false à l'utilisateur en fonction de sa réponse.
+
+        :return: boolean
+        """
+        global NUMERO_QUESTION
+
+        print("QUESTION n° " + str(NUMERO_QUESTION) + "/20 ")
         print("  " + self.titre)
         for i in range(len(self.choix)):
             print("  ", i + 1, "-", self.choix[i])
 
         print()
         resultat_response_correcte = False
-        reponse_int = Question.demander_reponse_numerique_utlisateur(1, len(self.choix))
+        reponse_int = Question.demander_reponse_utilisateur_numerique(1, len(self.choix))
+
         if self.choix[reponse_int - 1].lower() == self.bonne_reponse.lower():
             print("Bonne réponse")
             resultat_response_correcte = True
@@ -36,9 +55,20 @@ class Question:
             print("Mauvaise réponse")
 
         print()
+        if NUMERO_QUESTION >= 20:
+            NUMERO_QUESTION = 1
+        else:
+            NUMERO_QUESTION += 1
         return resultat_response_correcte
 
-    def demander_reponse_numerique_utlisateur(min, max):
+    def demander_reponse_utilisateur_numerique(min: int, max: int)-> int:
+        """
+        Fonction pour récupérer la réponse numérique de l'utilisateur.
+
+        :param min: int, le numéro de la réponse la plus basse
+        :param max: int, le numéro de la réponse la plus haute
+        :return: le choix numérique de l'utilisateur
+        """
         reponse_str = input("Votre réponse (entre " + str(min) + " et " + str(max) + ") :")
         try:
             reponse_int = int(reponse_str)
@@ -48,19 +78,25 @@ class Question:
             print("ERREUR : Vous devez rentrer un nombre entre", min, "et", max)
         except:
             print("ERREUR : Veuillez rentrer uniquement des chiffres")
-        return Question.demander_reponse_numerique_utlisateur(min, max)
+        return Question.demander_reponse_utilisateur_numerique(min, max)
 
 
 class Questionnaire:
 
-    def __init__(self, questions):
+    def __init__(self, questions : list):
         self.questions = questions
 
-    def lancer(self):
+    def lancer(self) -> int:
+        """
+        Fonction pour comptabiliser le nombre de bonne réponse au questionnaire généré
+        :return: int, le score de l'utilisateur
+        """
+
         score = 0
         for question in self.questions:
             if question.poser():
                 score += 1
+
         print("Score final :", score, "sur", len(self.questions))
         return score
 
@@ -81,6 +117,15 @@ questionnaire = json.loads(data_json)
 
 # Génerer questionnaire.
 questionnaire_data_question = questionnaire["questions"]
-q = Question.FromJsonData(questionnaire_data_question[0])
+questions = [Question.FromJsonData(i) for i in questionnaire_data_question]
+
+"""
+Pour une question, on génére un objet question
+q = Question.FromJsonData(questionnaire_data_question)
 q.poser()
+print()"""
+
+# lancement du questionnaire avec toute les questions et pas 1
+
+Questionnaire(questions).lancer()
 print()
