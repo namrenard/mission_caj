@@ -111,7 +111,7 @@ class Questionnaire:
         :return: un objet trié avec les données pour lancer un questionnaire
         """
         questionnaire_data_question = data["questions"]
-        qs = [Question.from_json_data(i) for i in questionnaire_data_question]
+        qs = [Question.from_json_data(i) for i in questionnaire_data_question if Question.from_json_data(i)]
 
         return Questionnaire(data["titre"], data["categorie"], data["difficulte"], qs)
 
@@ -146,8 +146,6 @@ class Questionnaire:
 
         return Questionnaire.from_json_data(questionnaire).lancer()
 
-
-# --------------charger fichier json
 
 if len(sys.argv) == 2 and ".json" in (sys.argv[1]):
     Questionnaire.start(sys.argv[1])
