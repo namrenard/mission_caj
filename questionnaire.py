@@ -3,7 +3,6 @@ Fichier de génération de questionnaires depuis des fichiers json.
 """
 import json
 
-
 NUMERO_QUESTION = 1
 
 
@@ -11,14 +10,15 @@ class Question:
     """
     Classe qui permet de générer une question depuis un fichier JSON
     """
+
     def __init__(self, titre: str, choix: list, bonne_reponse: str):
         self.titre = titre
         self.choix = choix
         self.bonne_reponse = bonne_reponse
 
-    def FromJsonData(data : dict) -> object:
+    def from_json_data(data: dict) -> object:
         """
-        Fonction qui permet de lire un fichier json et d'en extraire les données.
+        Fonction qui permet de lire un fichier json et d'en extraire le titre, le choix de réponse et la bonne réponse.
 
         :returns: un objet Question avec ses données
         """
@@ -39,6 +39,7 @@ class Question:
         """
         global NUMERO_QUESTION
 
+        print("Questionnaire ")
         print("QUESTION n° " + str(NUMERO_QUESTION) + "/20 ")
         print("  " + self.titre)
         for i in range(len(self.choix)):
@@ -55,13 +56,13 @@ class Question:
             print("Mauvaise réponse")
 
         print()
-        if NUMERO_QUESTION >= 20:
+        if NUMERO_QUESTION >=20 :
             NUMERO_QUESTION = 1
         else:
             NUMERO_QUESTION += 1
         return resultat_response_correcte
 
-    def demander_reponse_utilisateur_numerique(min: int, max: int)-> int:
+    def demander_reponse_utilisateur_numerique(min: int, max: int) -> int:
         """
         Fonction pour récupérer la réponse numérique de l'utilisateur.
 
@@ -83,8 +84,17 @@ class Question:
 
 class Questionnaire:
 
-    def __init__(self, questions : list):
+    def __init__(self, titre: str, categorie: str, difficulte: str, questions : list):
         self.questions = questions
+        self.titre = titre
+        self.categorie = categorie
+        self.difficulte = difficulte
+
+    def from_json_data(data):
+        questionnaire_data_question = data["questions"]
+        qs = [Question.from_json_data(i) for i in questionnaire_data_question]
+
+        return Questionnaire(data["titre"], data["categorie"], data["difficulte"], qs)
 
     def lancer(self) -> int:
         """
@@ -93,12 +103,19 @@ class Questionnaire:
         """
 
         score = 0
+        print("_______________________")
+        print("Questionnaire : " + self.titre)
+        print("Catégorie : " + self.categorie)
+        print("Difficulté : " + self.difficulte)
+        print("Nombre de questions : " + str(len(self.questions)))
+        print("_______________________")
         for question in self.questions:
             if question.poser():
                 score += 1
 
         print("Score final :", score, "sur", len(self.questions))
         return score
+
 
 # q1 = Question("Quelle est la capitale de la France ?", ("Marseille", "Nice", "Paris", "Nantes", "Lille"), "Paris")
 # q1.poser()
@@ -108,24 +125,13 @@ class Questionnaire:
 # print(q.__dict__)
 
 
-#--------------charger fichier json
-filename = "animaux_leschats_confirme.json" #test avec un fichier
+# --------------charger fichier json
+filename = "animaux_leschats_confirme.json"  # test avec un fichier
 file = open(filename, "r")
 data_json = file.read()
 file.close()
 questionnaire = json.loads(data_json)
 
-# Génerer questionnaire.
-questionnaire_data_question = questionnaire["questions"]
-questions = [Question.FromJsonData(i) for i in questionnaire_data_question]
+Questionnaire.from_json_data(questionnaire).lancer()
 
-"""
-Pour une question, on génére un objet question
-q = Question.FromJsonData(questionnaire_data_question)
-q.poser()
-print()"""
-
-# lancement du questionnaire avec toute les questions et pas 1
-
-Questionnaire(questions).lancer()
 print()
