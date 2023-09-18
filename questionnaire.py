@@ -30,17 +30,16 @@ class Question:
         q = Question(data["titre"], choix, bonne_reponse[0])
         return q
 
-    def poser(self) -> bool:
+    def poser(self, numero_question : int, nb_question_total : int) -> bool:
         """
         Fonction pour démarrer le questionnaire.
         Elle retourne true ou false à l'utilisateur en fonction de sa réponse.
 
         :return: boolean
         """
-        global NUMERO_QUESTION
 
         print("Questionnaire ")
-        print("QUESTION n° " + str(NUMERO_QUESTION) + "/20 ")
+        print("QUESTION n° " + str(numero_question + 1) + "/" + str(nb_question_total))
         print("  " + self.titre)
         for i in range(len(self.choix)):
             print("  ", i + 1, "-", self.choix[i])
@@ -56,10 +55,6 @@ class Question:
             print("Mauvaise réponse")
 
         print()
-        if NUMERO_QUESTION >=20 :
-            NUMERO_QUESTION = 1
-        else:
-            NUMERO_QUESTION += 1
         return resultat_response_correcte
 
     def demander_reponse_utilisateur_numerique(min: int, max: int) -> int:
@@ -109,11 +104,12 @@ class Questionnaire:
         print("Difficulté : " + self.difficulte)
         print("Nombre de questions : " + str(len(self.questions)))
         print("_______________________")
-        for question in self.questions:
-            if question.poser():
+        for index in range(len(self.questions)):
+            question = self.questions[index]
+            if question.poser(index, len(self.questions)):
                 score += 1
 
-        print("Score final :", score, "sur", len(self.questions))
+        print("Votre score final est de :", score, "sur", len(self.questions))
         return score
 
 
