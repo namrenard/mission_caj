@@ -46,7 +46,6 @@ class Question:
         :return: boolean
         """
 
-        print("Questionnaire ")
         print("QUESTION n° " + str(numero_question + 1) + "/" + str(nb_question_total))
         print("  " + self.titre)
         for i in range(len(self.choix)):
@@ -147,6 +146,7 @@ class Questionnaire:
         return Questionnaire.from_json_data(questionnaire).lancer()
 
 
+# programme principal
 if len(sys.argv) == 2 and ".json" in (sys.argv[1]):
     Questionnaire.start(sys.argv[1])
 else:
