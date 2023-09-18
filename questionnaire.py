@@ -2,16 +2,22 @@
 Fichier de génération de questionnaires depuis des fichiers json.
 """
 import json
-
-NUMERO_QUESTION = 1
+import sys
 
 
 class Question:
     """
-    Classe qui permet de générer une question depuis un fichier JSON
+    Classe Question : Elle permet de dérouler le contenu d'une question depuis un fichier JSON
     """
 
     def __init__(self, titre: str, choix: list, bonne_reponse: str):
+        """
+        Constructeur de la classe Question
+
+        :param titre: str, le titre d'une question
+        :param choix: list, une liste de réponse possible à la question
+        :param bonne_reponse: str, la réponse valide à la question
+        """
         self.titre = titre
         self.choix = choix
         self.bonne_reponse = bonne_reponse
@@ -20,7 +26,9 @@ class Question:
         """
         Fonction qui permet de lire un fichier json et d'en extraire le titre, le choix de réponse et la bonne réponse.
 
-        :returns: un objet Question avec ses données
+        :param: data, un dictionnaire contenant toutes les données d'une question
+
+        :returns: un objet Question avec ses données triées
         """
         choix = [i[0] for i in data["choix"]]
         bonne_reponse = [i[0] for i in data["choix"] if i[1]]
@@ -78,14 +86,30 @@ class Question:
 
 
 class Questionnaire:
+    """
+    Classe Questionnaire pour gérer un questionnaire depuis un fichier json
+    """
 
-    def __init__(self, titre: str, categorie: str, difficulte: str, questions : list):
+    def __init__(self, titre: str, categorie: str, difficulte: str, questions: list):
+        """
+        Constructeur de la classe
+        :param titre: str, le titre général du questionnaire
+        :param categorie: str, le nom de la catégorie auquel appartient le questionnaire
+        :param difficulte: str, le niveau de difficulté du questionnaire
+        :param questions: list, la liste des questions
+        """
         self.questions = questions
         self.titre = titre
         self.categorie = categorie
         self.difficulte = difficulte
 
-    def from_json_data(data):
+    def from_json_data(data: dict) -> object:
+        """
+        Fonction qui trie les données issus du fichier json.
+
+        :param data: dict, les données brute du questionnaire désérialisé
+        :return: un objet trié avec les données pour lancer un questionnaire
+        """
         questionnaire_data_question = data["questions"]
         qs = [Question.from_json_data(i) for i in questionnaire_data_question]
 
@@ -93,7 +117,8 @@ class Questionnaire:
 
     def lancer(self) -> int:
         """
-        Fonction pour comptabiliser le nombre de bonne réponse au questionnaire généré
+        Fonction pour comptabiliser le nombre de bonne réponse au questionnaire généré.
+
         :return: int, le score de l'utilisateur
         """
 
@@ -112,22 +137,22 @@ class Questionnaire:
         print("Votre score final est de :", score, "sur", len(self.questions))
         return score
 
+    def start(file_data: str):
 
-# q1 = Question("Quelle est la capitale de la France ?", ("Marseille", "Nice", "Paris", "Nantes", "Lille"), "Paris")
-# q1.poser()
+        filename = open(file_data, "r")
+        data_json = filename.read()
+        filename.close()
+        questionnaire = json.loads(data_json)
 
-# data = (("Marseille", "Nice", "Paris", "Nantes", "Lille"), "Paris", "Quelle est la capitale de la France ?")
-# q = Question.FromData(data)
-# print(q.__dict__)
+        return Questionnaire.from_json_data(questionnaire).lancer()
 
 
 # --------------charger fichier json
-filename = "animaux_leschats_confirme.json"  # test avec un fichier
-file = open(filename, "r")
-data_json = file.read()
-file.close()
-questionnaire = json.loads(data_json)
 
-Questionnaire.from_json_data(questionnaire).lancer()
+if len(sys.argv) == 2 and ".json" in (sys.argv[1]):
+    Questionnaire.start(sys.argv[1])
+else:
+    print("Erreur, veuillez indiquer un seul fichier 'json' en paramètre de votre commande")
+    sys.exit()
 
 print()
